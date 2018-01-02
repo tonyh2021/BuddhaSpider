@@ -46,9 +46,35 @@ class Sqlite3Pipeline(object):
 
     def process_item(self, item, spider):
         tal = self.db_table_name
-        name = item['name']
+        name = self.sqliteEscape(item['name'])
         url = item['url']
-        self.cursor.execute(
-            data_store.INSERT_CMD.format(tbl=tal, name=name, url=url))
+        download_url = item['download_url']   # 视频下载地址 url
+        duration = self.sqliteEscape(item['duration'])        # 时长
+        points = self.sqliteEscape(item['points'])          # 积分
+        add_time = self.sqliteEscape(item['add_time'])        # 添加时间
+        author = self.sqliteEscape(item['author'])         # 作者
+        desc = self.sqliteEscape(item['desc'])            # 描述
+        self.cursor.execute(data_store.INSERT_CMD.format(
+            tbl=tal,
+            name=name,
+            url=url,
+            download_url=download_url,
+            duration=duration,
+            points=points,
+            add_time=add_time,
+            author=author,
+            desc=desc))
         self.conn.commit()
         return item
+
+    def sqliteEscape(self, keyWord):
+        keyWord = keyWord.replace("/", "//")
+        keyWord = keyWord.replace("'", '"')
+        keyWord = keyWord.replace("[", "/[")
+        keyWord = keyWord.replace("]", "/]")
+        keyWord = keyWord.replace("%", "/%")
+        keyWord = keyWord.replace("&", "/&")
+        keyWord = keyWord.replace("_", "/_")
+        keyWord = keyWord.replace("(", "/(")
+        keyWord = keyWord.replace(")", "/)")
+        return keyWord

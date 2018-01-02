@@ -208,3 +208,4 @@ class RandomProxy(object):
                 self.chosen_proxy = random.choice(list(self.proxies.keys()))
             logger.info('Removing failed proxy <%s>, %d proxies left' % (
                 proxy, len(self.proxies)))
+

@@ -12,7 +12,6 @@ import pandas as pd
 
 # 创建一个日志器logger并设置其日志级别为DEBUG
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 # 创建一个流处理器handler并设置其日志级别为DEBUG
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.DEBUG)
@@ -27,19 +26,61 @@ logger.addHandler(handler)
 
 
 INSERT_CMD = """INSERT INTO {tbl} (
-                    name, url) VALUES ( '{name}', '{url}' );"""
+                    name,
+                    url,
+                    download_url,
+                    duration,
+                    points,
+                    add_time,
+                    author,
+                    desc) VALUES (
+                        '{name}',
+                        '{url}',
+                        '{download_url}',
+                        '{duration}',
+                        '{points}',
+                        '{add_time}',
+                        '{author}',
+                        '{desc}');"""
 DROP_TABLE_CMD = """DROP TABLE IF EXISTS {tbl};"""
 CREATE_TALE_CMD = """CREATE TABLE IF NOT EXISTS {tbl} (
                     id integer primary key,
                     name text,
-                    url  text);"""
+                    url  text,
+                    download_url  text,
+                    duration  text,
+                    points  text,
+                    add_time  text,
+                    author  text,
+                    desc text);"""
 
 TEST_INSERT_CMD = """INSERT INTO {tbl} (
-                    name, url) VALUES ( '{name}', '{url}' );"""
+                    name,
+                    url,
+                    download_url,
+                    duration,
+                    points,
+                    add_time,
+                    author,
+                    desc) VALUES (
+                        '{name}',
+                        '{url}',
+                        '{download_url}',
+                        '{duration}',
+                        '{points}',
+                        '{add_time}',
+                        '{author}',
+                        '{desc}');"""
 TEST_CREATE_TALE_CMD = """CREATE TABLE IF NOT EXISTS {tbl} (
                     id integer primary key,
                     name text,
-                    url  text);"""
+                    url  text,
+                    download_url  text,
+                    duration  text,
+                    points  text,
+                    add_time  text,
+                    author  text,
+                    desc text);"""
 
 
 class DataStore(object):
@@ -62,32 +103,41 @@ class DataStore(object):
     def close(self):
         self.conn.close()
 
-    def save_buddha(self, name, url):
-        if '\'' in name:
-            name = name.replace('\'', "-")
-        if '\'' in url:
-            url = url.replace('\'', "-")
+    def save_buddha(self, buddha):
+        if '\'' in buddha.name:
+            name = buddha.name.replace('\'', "-")
+        if '\'' in buddha.url:
+            url = buddha.url.replace('\'', "-")
         self.cursor.execute(
-            TEST_INSERT_CMD.format(tbl=self.db_table_name, name=name, url=url))
+            TEST_INSERT_CMD.format(
+                tbl=self.db_table_name,
+                name=name,
+                url=url,
+                download_url=buddha.download_url,    # 视频下载地址 url
+                duration=buddha.duration,        # 时长
+                points=buddha.points,          # 积分
+                add_time=buddha.add_time,        # 添加时间
+                author=buddha.author,          # 作者
+                desc=buddha.desc))            # 描述
         self.conn.commit()
 
     def fetch_all(self):
         query = "SELECT * FROM {tbl}".format(tbl=self.db_table_name)
         df = pd.read_sql_query(query, self.conn)
-        return df
-
-    def fetch_buddha(self, limit=10):
-        query = "SELECT * FROM {tbl} LIMIT {limit}".format(
-            tbl=self.db_table_name, limit=limit)
-        df = pd.read_sql_query(query, self.conn)
         logger.info("\n %s " % (df))
-        return df
+
+    def fetch_download_url(self, limit=10):
+        query = "SELECT download_url FROM {tbl} LIMIT {limit}".format(
+            tbl=self.db_table_name, limit=limit)
+        self.cursor.execute(query)
+        urls = []
+        for row in self.cursor:
+            urls.append(row)
+        return urls
 
 
 def main():
     ds = DataStore()
-    ds.save_buddha('buddha1', 'http:91')
-    logger.info("\n %s " % ds.fetch_buddha())
     ds.close()
 
 

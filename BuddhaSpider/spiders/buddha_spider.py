@@ -72,34 +72,118 @@ class BuddhaSpider(scrapy.Spider):
         #     response_file.write(response.body)
 
     def parse_detail(self, response):
-        useraction = response.xpath('//div[@id="useraction"]')
-        videodetails = response.xpath('//div[@id="videodetails"]')
-        logger.info("useraction: %s" % (useraction))
-        logger.info("videodetails: %s" % (videodetails))
+        if response.url == 'http://91porn.com/login.php':
+            return
         buddha = BuddhaItem()
-        buddha["name"] = response.xpath(
-            '//div[@id="viewvideo-title"]/text()').extract()[0].strip()
+        try:
+            name = response.xpath(
+                '//div[@id="viewvideo-title"]/text()').extract()[0]
+            name = "".join(name.split())
+            logger.info("Buddha - Parse Detail: %s" % (name))
+        except (ValueError, IndexError):
+            logger.error(
+                "Buddha - Parse Detail Error: %s,\n\
+                 name parse error" % (response.url))
+            name = ''
+        buddha["name"] = name
+
         buddha["url"] = response.url
-        logger.info("Buddha - Parse Detail: %s" % (buddha))
+
+        try:
+            download_url = response.xpath(
+                '//video[@id="vid"]/source/@src').extract()[0]
+            download_url = "".join(download_url.split())
+            logger.info("Buddha - Parse Detail: %s" % (download_url))
+        except (ValueError, IndexError):
+            logger.error(
+                "Buddha - Parse Detail Error: %s,\n\
+                 download_url parse error" % (response.url))
+            download_url = ''
+        buddha["download_url"] = download_url
+
+        try:
+            duration = response.xpath(
+                '//div[@class="boxPart"]/text()').extract()[1]
+            duration = "".join(duration.split())
+            logger.info("Buddha - Parse Detail: %s" % (duration))
+        except (ValueError, IndexError):
+            logger.error(
+                "Buddha - Parse Detail Error: %s,\n\
+                 duration parse error" % (response.url))
+            duration = ''
+        buddha["duration"] = duration
+
+        try:
+            points = response.xpath(
+                '//div[@class="boxPart"]/text()').extract()[-1]
+            points = "".join(points.split())
+            logger.info("Buddha - Parse Detail: %s" % (points))
+        except (ValueError, IndexError):
+            logger.error(
+                "Buddha - Parse Detail Error: %s,\n\
+                 points parse error" % (response.url))
+            points = ''
+        buddha["points"] = points
+
+        try:
+            add_time = response.xpath(
+                '//div[@id="videodetails-content"]/\
+                span[@class="title"]/text()').extract()[0]
+            add_time = "".join(add_time.split())
+            logger.info("Buddha - Parse Detail: %s" % (add_time))
+        except (ValueError, IndexError):
+            logger.error(
+                "Buddha - Parse Detail Error: %s,\n\
+                 add_time parse error" % (response.url))
+            add_time = ''
+        buddha["add_time"] = add_time
+
+        try:
+            author = response.xpath(
+                '//div[@id="videodetails-content"]/a/\
+                span[@class="title"]/text()').extract()[0]
+            author = "".join(author.split())
+            logger.info("Buddha - Parse Detail: %s" % (author))
+        except (ValueError, IndexError):
+            logger.error(
+                "Buddha - Parse Detail Error: %s,\n\
+                 author parse error" % (response.url))
+            author = ''
+        buddha["author"] = author
+
+        try:
+            more = response.xpath(
+                '//span[@class="more"]/text()').extract()[0]
+            more = "".join("".join(more).split())
+            # logger.info("Buddha - Parse Detail: %s" % (
+            #         more))
+        except (ValueError, IndexError):
+            logger.error(
+                "Buddha - Parse Detail Error: %s,\n\
+                 more parse error" % (response.url))
+            more = ''
+        desc = more
+        logger.info("Buddha - Parse Detail: %s" % (
+                desc))
+        buddha["desc"] = desc
+
+        # logger.info("Buddha - Parse Detail: %s" % (buddha))
         yield buddha
-        filename = 'buddha_detail_%s.html' % int(time.time())
-        with open(filename, 'wb') as response_file:
-            response_file.write(response.body)
+        # filename = 'buddha_detail_%s.html' % int(time.time())
+        # with open(filename, 'wb') as response_file:
+        #     response_file.write(response.body)
 
     def parse_next_page(self, response):
         xpath_str = '//*[@id="paging"]/div/form/a/@href'
-        try:
-            next_url = response.urljoin(
+        next_url = response.urljoin(
                 response.xpath(xpath_str).extract()[-1])
-            logger.info("Buddha - Parse Next Page : %s" % (next_url))
-            yield scrapy.Request(
-                url=next_url,
-                callback=self.parse,
-                dont_filter=True)
-            yield scrapy.Request(
-                url=next_url,
-                callback=self.parse_next_page,
-                dont_filter=True)
-        except Exception:
-            logger.info("Buddha - Parse Next Page Error: %s" % (Exception))
-            return
+        logger.info("Buddha - Parse Next Page : %s" % (next_url))
+        yield scrapy.Request(
+            url=next_url,
+            callback=self.parse,
+            dont_filter=True)
+        yield scrapy.Request(
+            url=next_url,
+            callback=self.parse_next_page,
+            dont_filter=True)
+

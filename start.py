@@ -8,10 +8,6 @@ import sys
 import os
 import argparse
 from BuddhaSpider.utils.data_store import DataStore
-import logging
-
-
-logger = logging.getLogger(__name__)
 
 
 # 将系统当前目录设置为项目根目录
@@ -28,7 +24,13 @@ def crawl():
 
 def query():
     ds = DataStore()
-    ds.fetch_buddha(100)
+    urls = ds.fetch_download_url(100)
+    with open('urls.txt', 'w') as f:
+        f.write('\n')
+    for url in urls:
+        with open('urls.txt', 'a') as f:
+            f.write('%s\n' % (url))
+        print("%s" % (url))
     ds.close()
 
 
@@ -38,7 +40,7 @@ parser = argparse.ArgumentParser()
 # Add argument
 parser.add_argument('-mode', type=int, help='seletc run mode.\n\
                         0: scrapy crawl buddha. \n\
-                        1:query from sqlite')
+                        1: query from sqlite')
 
 # Parse argument
 args = parser.parse_args()
