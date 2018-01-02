@@ -10,7 +10,6 @@ import scrapy
 import logging
 import random
 from buddha_item import BuddhaItem
-import time
 
 
 logging.basicConfig(filename='buddha.log', level=logging.DEBUG, filemode='w')
@@ -45,10 +44,10 @@ class BuddhaSpider(scrapy.Spider):
             scrapy.Request(
                 url=self.start_urls[0],
                 callback=self.parse),
-            # scrapy.Request(
-            #     url=self.start_urls[0],
-            #     callback=self.parse_next_page,
-            #     dont_filter=True),
+            scrapy.Request(
+                url=self.start_urls[0],
+                callback=self.parse_next_page,
+                dont_filter=True),
             ]
 
     def parse(self, response):
