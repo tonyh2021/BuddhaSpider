@@ -1,0 +1,5 @@
+scrapy
+pandas
+base64
+re
+logging
