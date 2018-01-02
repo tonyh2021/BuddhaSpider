@@ -1,6 +1,6 @@
 # BuddhaSpider
 
-BuddhaSpider is a Scrapy project for fetching [91Porn](http://91porn.com/index.php) videos.
+BuddhaSpider is a Scrapy project for fetching [91Porn](http://91porn.com/index.php) videos.You know what I mean.😜
 
 # Extracted data
 
@@ -14,6 +14,16 @@ Or you can run the spider using the `python start.py` command, such as:
 ```shell
 $ python start.py
 ```
+
+# Requirements
+
+Maybe you need the following dependencies:
+
+- scrapy
+- pandas
+- base64
+- re
+- logging
 
 # License
 MIT. See the `LICENSE.md` file.
