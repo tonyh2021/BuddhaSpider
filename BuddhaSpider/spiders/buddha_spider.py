@@ -10,6 +10,7 @@ import scrapy
 import logging
 import random
 from buddha_item import BuddhaItem
+from utils.data_store import DataStore
 
 
 logging.basicConfig(filename='buddha.log', level=logging.DEBUG, filemode='w')
@@ -52,10 +53,17 @@ class BuddhaSpider(scrapy.Spider):
 
     def parse(self, response):
         logger.info("Buddha - Parse : %s" % (response.url))
-        xpath_str = '//*[@class="listchannel"]/a'
-        for item in response.xpath(xpath_str):
-            href = item.xpath('@href').extract()[0]
+        xpath_str = '//*[@class="listchannel"]/a[@target="blank"]/@href'
+        for href in response.xpath(xpath_str).extract():
             logger.info("Request Detail: %s" % (href))
+            # 查询是否重复
+            viewkey = self._viewkey_from_url(href)
+            ds = DataStore()
+            exists = ds.buddha_exists(viewkey)
+            ds.close()
+            if exists:
+                logger.warning("Ignore, View: %s exits" % (viewkey))
+                continue
             random_ip = str(random.randint(0, 255)) + "." + \
                 str(random.randint(0, 255)) + "." + \
                 str(random.randint(0, 255)) + "." + \
@@ -71,8 +79,6 @@ class BuddhaSpider(scrapy.Spider):
         #     response_file.write(response.body)
 
     def parse_detail(self, response):
-        if response.url == 'http://91porn.com/login.php':
-            return
         buddha = BuddhaItem()
         try:
             name = response.xpath(
@@ -88,17 +94,20 @@ class BuddhaSpider(scrapy.Spider):
 
         buddha["url"] = response.url
 
+        viewkey = ''
         try:
             download_url = response.xpath(
                 '//video[@id="vid"]/source/@src').extract()[0]
             download_url = "".join(download_url.split())
             logger.info("Buddha - Parse Detail: %s" % (download_url))
+            viewkey = self._viewkey_from_url(download_url)
         except (ValueError, IndexError):
             logger.error(
                 "Buddha - Parse Detail Error: %s,\n\
                  download_url parse error" % (response.url))
             download_url = ''
         buddha["download_url"] = download_url
+        buddha["viewkey"] = viewkey
 
         try:
             duration = response.xpath(
@@ -186,3 +195,11 @@ class BuddhaSpider(scrapy.Spider):
             callback=self.parse_next_page,
             dont_filter=True)
 
+    def _viewkey_from_url(self, url):
+        key = 'viewkey='
+        viewkey = ''
+        if key in url:
+            start = url.index(key) + len(key)
+            end = start + 20
+            viewkey = url[start:end]
+        return viewkey

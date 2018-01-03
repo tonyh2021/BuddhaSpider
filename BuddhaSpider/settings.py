@@ -22,7 +22,8 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
 USER_AGENT_LIST = 'BuddhaSpider/utils/useragents.txt'
 
 # PROXY = 'http://127.0.0.1:1087'
-PROXY = 'http://127.0.0.1:56814'
+# PROXY = 'http://127.0.0.1:56814'
+PROXY = 'http://127.0.0.1:55134'
 
 # Proxy list containing entries like
 # http://host1:port
@@ -51,7 +52,7 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 0.5
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -75,16 +76,16 @@ SQLITE3_TABLE_NAME = 'BuddhaTable'
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    'BuddhaSpider.middlewares.BuddhaSpiderMiddleware': 543,
+#    'BuddhaSpider.middlewares.spider_middlewares.BuddhaSpiderMiddleware': 543,
 # }
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    'BuddhaSpider.middlewares.RandomUserAgentMiddleware': 543,
+    'BuddhaSpider.middlewares.ua_middleware.RandomUserAgentMiddleware': 543,
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
-    'BuddhaSpider.middlewares.ProxyMiddleware': 100,
+    'BuddhaSpider.middlewares.proxy_middlewares.ProxyMiddleware': 100,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
 }
 

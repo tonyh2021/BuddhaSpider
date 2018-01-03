@@ -9,6 +9,7 @@ import scrapy
 
 
 class BuddhaItem(scrapy.Item):
+    viewkey = scrapy.Field()         # 视频key
     name = scrapy.Field()            # 视频名称
     url = scrapy.Field()             # 视频 url
     download_url = scrapy.Field()    # 视频下载地址 url

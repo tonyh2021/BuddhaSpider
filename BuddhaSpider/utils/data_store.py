@@ -24,8 +24,10 @@ handler.setFormatter(formatter)
 # 为日志器logger添加上面创建的处理器handler
 logger.addHandler(handler)
 
-
+SELECT_VIEWKEY_CMD = """SELECT viewkey FROM {tbl} WHERE viewkey
+                        = '{viewkey}';"""
 INSERT_CMD = """INSERT INTO {tbl} (
+                    viewkey,
                     name,
                     url,
                     download_url,
@@ -34,6 +36,7 @@ INSERT_CMD = """INSERT INTO {tbl} (
                     add_time,
                     author,
                     desc) VALUES (
+                        '{viewkey}',
                         '{name}',
                         '{url}',
                         '{download_url}',
@@ -45,34 +48,7 @@ INSERT_CMD = """INSERT INTO {tbl} (
 DROP_TABLE_CMD = """DROP TABLE IF EXISTS {tbl};"""
 CREATE_TALE_CMD = """CREATE TABLE IF NOT EXISTS {tbl} (
                     id integer primary key,
-                    name text,
-                    url  text,
-                    download_url  text,
-                    duration  text,
-                    points  text,
-                    add_time  text,
-                    author  text,
-                    desc text);"""
-
-TEST_INSERT_CMD = """INSERT INTO {tbl} (
-                    name,
-                    url,
-                    download_url,
-                    duration,
-                    points,
-                    add_time,
-                    author,
-                    desc) VALUES (
-                        '{name}',
-                        '{url}',
-                        '{download_url}',
-                        '{duration}',
-                        '{points}',
-                        '{add_time}',
-                        '{author}',
-                        '{desc}');"""
-TEST_CREATE_TALE_CMD = """CREATE TABLE IF NOT EXISTS {tbl} (
-                    id integer primary key,
+                    viewkey text,
                     name text,
                     url  text,
                     download_url  text,
@@ -97,11 +73,20 @@ class DataStore(object):
         logger.info('Reset table: %s' % (self.db_table_name))
         self.cursor.execute(DROP_TABLE_CMD.format(tbl=self.db_table_name))
         self.cursor.execute(
-            TEST_CREATE_TALE_CMD.format(tbl=self.db_table_name))
+            CREATE_TALE_CMD.format(tbl=self.db_table_name))
         self.conn.commit()
 
     def close(self):
         self.conn.close()
+
+    def buddha_exists(self, viewkey):
+        query = SELECT_VIEWKEY_CMD.format(
+            tbl=self.db_table_name, viewkey=viewkey)
+        self.cursor.execute(query)
+        viewkeys = self.cursor.fetchall()
+        if len(viewkeys) > 0:
+            return True
+        return False
 
     def save_buddha(self, buddha):
         if '\'' in buddha.name:
@@ -109,8 +94,9 @@ class DataStore(object):
         if '\'' in buddha.url:
             url = buddha.url.replace('\'', "-")
         self.cursor.execute(
-            TEST_INSERT_CMD.format(
+            INSERT_CMD.format(
                 tbl=self.db_table_name,
+                viewkey=buddha.viewkey,
                 name=name,
                 url=url,
                 download_url=buddha.download_url,    # 视频下载地址 url

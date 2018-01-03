@@ -36,8 +36,8 @@ class Sqlite3Pipeline(object):
     def open_spider(self, spider):
         self.conn = sqlite3.connect(self.db_file_name)
         self.cursor = self.conn.cursor()
-        self.cursor.execute(
-            data_store.DROP_TABLE_CMD.format(tbl=self.db_table_name))
+        # self.cursor.execute(
+        #     data_store.DROP_TABLE_CMD.format(tbl=self.db_table_name))
         self.cursor.execute(
             data_store.CREATE_TALE_CMD.format(tbl=self.db_table_name))
 
@@ -46,6 +46,7 @@ class Sqlite3Pipeline(object):
 
     def process_item(self, item, spider):
         tal = self.db_table_name
+        viewkey = item['viewkey']
         name = self.sqliteEscape(item['name'])
         url = item['url']
         download_url = item['download_url']   # 视频下载地址 url
@@ -56,6 +57,7 @@ class Sqlite3Pipeline(object):
         desc = self.sqliteEscape(item['desc'])            # 描述
         self.cursor.execute(data_store.INSERT_CMD.format(
             tbl=tal,
+            viewkey=viewkey,
             name=name,
             url=url,
             download_url=download_url,
