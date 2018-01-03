@@ -93,22 +93,21 @@ class BuddhaSpider(scrapy.Spider):
         buddha["name"] = name
 
         buddha["url"] = response.url
+        viewkey = self._viewkey_from_url(response.url)
+        buddha["viewkey"] = viewkey
 
-        viewkey = ''
         try:
             download_url = response.xpath(
                 '//video[@id="vid"]/source/@src').extract()[0]
             download_url = "".join(download_url.split())
             logger.info("Buddha - Parse Detail: %s" % (download_url))
-            viewkey = self._viewkey_from_url(download_url)
         except (ValueError, IndexError):
             logger.error(
                 "Buddha - Parse Detail Error: %s,\n\
                  download_url parse error" % (response.url))
             download_url = ''
         buddha["download_url"] = download_url
-        buddha["viewkey"] = viewkey
-
+        
         try:
             duration = response.xpath(
                 '//div[@class="boxPart"]/text()').extract()[1]
@@ -198,6 +197,7 @@ class BuddhaSpider(scrapy.Spider):
     def _viewkey_from_url(self, url):
         key = 'viewkey='
         viewkey = ''
+        logger.info("+++++++++++++++++++ : %s" % (url))
         if key in url:
             start = url.index(key) + len(key)
             end = start + 20
