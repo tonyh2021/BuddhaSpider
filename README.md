@@ -15,7 +15,7 @@ Or you can run the spider using the `python start.py` command, such as:
 $ python start.py
 ```
 
-Note: Maybe you need breakthrough the GFW. Then I will recommend [Lantern](https://getlantern.org/zh_CN/).
+Note: Maybe you need breakthrough the GFW. Then I will recommend [Lantern](https://getlantern.org/zh_CN/). And if so, you need to check the `PROXY` in `settings.py`.
 
 # Requirements
 
