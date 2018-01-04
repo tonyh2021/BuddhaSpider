@@ -15,6 +15,8 @@ Or you can run the spider using the `python start.py` command, such as:
 $ python start.py
 ```
 
+Note: Maybe you need breakthrough the GFW. Then I will recommend [Lantern](https://getlantern.org/zh_CN/).
+
 # Requirements
 
 Maybe you need the following dependencies:
@@ -24,6 +26,7 @@ Maybe you need the following dependencies:
 - base64
 - re
 - logging
+- sqlite3
 
 Run `pip install -r requirements.txt` to install them. Maybe you need `sudo`.
 

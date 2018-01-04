@@ -11,6 +11,7 @@ import logging
 import random
 from buddha_item import BuddhaItem
 from utils.data_store import DataStore
+import math
 
 
 logging.basicConfig(filename='buddha.log', level=logging.DEBUG, filemode='w')
@@ -21,7 +22,8 @@ class BuddhaSpider(scrapy.Spider):
     # BuddhaSpider
 
     name = "buddha"
-    start_urls = ['http://91porn.com/v.php?viewtype=basic&category=rp']
+    start_urls = ['http://91porn.com/v.php?next=watch']
+    # http://91porn.com/v.php?next=watch 全部视频
     # http://91porn.com/v.php?viewtype=basic&category=rp&page=1 最近得分
     # http://91porn.com/v.php?viewtype=basic&category=rf 最近加精
     # start_urls = ['https://www.zhihu.com/signin']
@@ -44,12 +46,25 @@ class BuddhaSpider(scrapy.Spider):
         return [
             scrapy.Request(
                 url=self.start_urls[0],
-                callback=self.parse),
-            scrapy.Request(
-                url=self.start_urls[0],
-                callback=self.parse_next_page,
-                dont_filter=True),
+                callback=self.parse_last_page),
             ]
+
+    def parse_last_page(self, response):
+        xpath_str = '//*[@class="videopaging"]/text()'
+        item = response.xpath(xpath_str).extract()[0]
+        total_count = item.split(' ')[-1]
+        last_page_num = math.ceil(int(total_count) / 20)
+        logger.info("Videos Total Count: %s,\
+            Pages Total Count: %s" % (total_count, last_page_num))
+        url = self.start_urls[0] + '&page=%s' % last_page_num
+        yield scrapy.Request(
+                url=url,
+                callback=self.parse,
+                dont_filter=True)
+        yield scrapy.Request(
+                url=url,
+                callback=self.parse_previous_page,
+                dont_filter=True)
 
     def parse(self, response):
         logger.info("Buddha - Parse : %s" % (response.url))
@@ -180,24 +195,23 @@ class BuddhaSpider(scrapy.Spider):
         # with open(filename, 'wb') as response_file:
         #     response_file.write(response.body)
 
-    def parse_next_page(self, response):
+    def parse_previous_page(self, response):
         xpath_str = '//*[@id="paging"]/div/form/a/@href'
         next_url = response.urljoin(
-                response.xpath(xpath_str).extract()[-1])
-        logger.info("Buddha - Parse Next Page : %s" % (next_url))
+                response.xpath(xpath_str).extract()[0])
+        logger.info("Buddha - Parse Previous Page : %s" % (next_url))
         yield scrapy.Request(
             url=next_url,
             callback=self.parse,
             dont_filter=True)
         yield scrapy.Request(
             url=next_url,
-            callback=self.parse_next_page,
+            callback=self.parse_previous_page,
             dont_filter=True)
 
     def _viewkey_from_url(self, url):
         key = 'viewkey='
         viewkey = ''
-        logger.info("+++++++++++++++++++ : %s" % (url))
         if key in url:
             start = url.index(key) + len(key)
             end = start + 20
