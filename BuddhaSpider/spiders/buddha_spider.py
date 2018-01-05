@@ -12,9 +12,14 @@ import random
 from buddha_item import BuddhaItem
 from utils.data_store import DataStore
 import math
+import time
+import re
 
 
-logging.basicConfig(filename='buddha.log', level=logging.DEBUG, filemode='w')
+date_string = time.strftime("%Y_%m_%d", time.localtime())
+logging.basicConfig(
+    filename=('buddha_%s.log' % (date_string)),
+    level=logging.DEBUG, filemode='w')
 logger = logging.getLogger(__name__)
 
 
@@ -122,7 +127,19 @@ class BuddhaSpider(scrapy.Spider):
                  download_url parse error" % (response.url))
             download_url = ''
         buddha["download_url"] = download_url
-        
+
+        try:
+            image_url = response.xpath(
+                '//div[@class="example-video-container"]/\
+                video/@poster').extract()[0]
+            logger.info("Buddha - Parse Detail: %s" % (image_url))
+        except (ValueError, IndexError):
+            logger.error(
+                "Buddha - Parse Detail Error: %s,\n\
+                 image_url parse error" % (response.url))
+            image_url = ''
+        buddha["image_url"] = image_url
+
         try:
             duration = response.xpath(
                 '//div[@class="boxPart"]/text()').extract()[1]
@@ -204,10 +221,16 @@ class BuddhaSpider(scrapy.Spider):
             url=next_url,
             callback=self.parse,
             dont_filter=True)
-        yield scrapy.Request(
-            url=next_url,
-            callback=self.parse_previous_page,
-            dont_filter=True)
+        pagingnav = response.xpath(
+            '//*[@id="paging"]/div/form/\
+            span[@class="pagingnav"]/text()').extract()[0]
+        if pagingnav != '1':
+            yield scrapy.Request(
+                url=next_url,
+                callback=self.parse_previous_page,
+                dont_filter=True)
+        else:
+            logger.info("Buddha - End With Page : %s " % (pagingnav))
 
     def _viewkey_from_url(self, url):
         key = 'viewkey='

@@ -31,6 +31,7 @@ INSERT_CMD = """INSERT INTO {tbl} (
                     name,
                     url,
                     download_url,
+                    image_url,
                     duration,
                     points,
                     add_time,
@@ -40,6 +41,7 @@ INSERT_CMD = """INSERT INTO {tbl} (
                         '{name}',
                         '{url}',
                         '{download_url}',
+                        '{image_url}',
                         '{duration}',
                         '{points}',
                         '{add_time}',
@@ -52,6 +54,7 @@ CREATE_TALE_CMD = """CREATE TABLE IF NOT EXISTS {tbl} (
                     name text,
                     url  text,
                     download_url  text,
+                    image_url  text,
                     duration  text,
                     points  text,
                     add_time  text,
@@ -87,25 +90,6 @@ class DataStore(object):
         if len(viewkeys) > 0:
             return True
         return False
-
-    def save_buddha(self, buddha):
-        if '\'' in buddha.name:
-            name = buddha.name.replace('\'', "-")
-        if '\'' in buddha.url:
-            url = buddha.url.replace('\'', "-")
-        self.cursor.execute(
-            INSERT_CMD.format(
-                tbl=self.db_table_name,
-                viewkey=buddha.viewkey,
-                name=name,
-                url=url,
-                download_url=buddha.download_url,    # 视频下载地址 url
-                duration=buddha.duration,        # 时长
-                points=buddha.points,          # 积分
-                add_time=buddha.add_time,        # 添加时间
-                author=buddha.author,          # 作者
-                desc=buddha.desc))            # 描述
-        self.conn.commit()
 
     def fetch_all(self):
         query = "SELECT * FROM {tbl}".format(tbl=self.db_table_name)

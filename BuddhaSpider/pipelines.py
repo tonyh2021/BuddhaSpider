@@ -36,8 +36,7 @@ class Sqlite3Pipeline(object):
     def open_spider(self, spider):
         self.conn = sqlite3.connect(self.db_file_name)
         self.cursor = self.conn.cursor()
-        # self.cursor.execute(
-        #     data_store.DROP_TABLE_CMD.format(tbl=self.db_table_name))
+        # self.cursor.execute(data_store.DROP_TABLE_CMD.format(tbl=self.db_table_name))
         self.cursor.execute(
             data_store.CREATE_TALE_CMD.format(tbl=self.db_table_name))
 
@@ -50,6 +49,7 @@ class Sqlite3Pipeline(object):
         name = self.sqliteEscape(item['name'])
         url = item['url']
         download_url = item['download_url']   # 视频下载地址 url
+        image_url = item['image_url']
         duration = self.sqliteEscape(item['duration'])        # 时长
         points = self.sqliteEscape(item['points'])          # 积分
         add_time = self.sqliteEscape(item['add_time'])        # 添加时间
@@ -61,6 +61,7 @@ class Sqlite3Pipeline(object):
             name=name,
             url=url,
             download_url=download_url,
+            image_url=image_url,
             duration=duration,
             points=points,
             add_time=add_time,
