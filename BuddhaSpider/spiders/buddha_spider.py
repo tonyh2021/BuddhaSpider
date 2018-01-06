@@ -13,7 +13,6 @@ from buddha_item import BuddhaItem
 from utils.data_store import DataStore
 import math
 import time
-import re
 
 
 date_string = time.strftime("%Y_%m_%d", time.localtime())
@@ -27,10 +26,9 @@ class BuddhaSpider(scrapy.Spider):
     # BuddhaSpider
 
     name = "buddha"
-    start_urls = ['http://91porn.com/v.php?next=watch']
+    start_urls = ['http://91porn.com/v.php?category=rf']
     # http://91porn.com/v.php?next=watch 全部视频
-    # http://91porn.com/v.php?viewtype=basic&category=rp&page=1 最近得分
-    # http://91porn.com/v.php?viewtype=basic&category=rf 最近加精
+    # http://91porn.com/v.php?category=rf 最近加精
     # start_urls = ['https://www.zhihu.com/signin']
     # start_urls = ['https://twitter.com/']
     headers = {
@@ -81,7 +79,7 @@ class BuddhaSpider(scrapy.Spider):
             ds = DataStore()
             exists = ds.buddha_exists(viewkey)
             ds.close()
-            if exists:
+            if exists and 'category=rf' not in self.start_urls[0]:
                 logger.warning("Ignore, View: %s exits" % (viewkey))
                 continue
             random_ip = str(random.randint(0, 255)) + "." + \
@@ -206,6 +204,11 @@ class BuddhaSpider(scrapy.Spider):
                 desc))
         buddha["desc"] = desc
 
+        buddha["rf"] = 0
+        if 'category=rf' in self.start_urls[0]:
+            logger.info("Buddha - Parse Detail rf : %s" % (buddha["rf"]))
+            buddha["rf"] = 1
+
         # logger.info("Buddha - Parse Detail: %s" % (buddha))
         yield buddha
         # filename = 'buddha_detail_%s.html' % int(time.time())
@@ -224,7 +227,7 @@ class BuddhaSpider(scrapy.Spider):
         pagingnav = response.xpath(
             '//*[@id="paging"]/div/form/\
             span[@class="pagingnav"]/text()').extract()[0]
-        if pagingnav != '1':
+        if pagingnav != '1':  # 已经解析到第一页了，停止
             yield scrapy.Request(
                 url=next_url,
                 callback=self.parse_previous_page,

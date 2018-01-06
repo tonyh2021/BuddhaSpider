@@ -54,19 +54,31 @@ class Sqlite3Pipeline(object):
         points = self.sqliteEscape(item['points'])          # 积分
         add_time = self.sqliteEscape(item['add_time'])        # 添加时间
         author = self.sqliteEscape(item['author'])         # 作者
+        rf = item['rf']
         desc = self.sqliteEscape(item['desc'])            # 描述
-        self.cursor.execute(data_store.INSERT_CMD.format(
-            tbl=tal,
-            viewkey=viewkey,
-            name=name,
-            url=url,
-            download_url=download_url,
-            image_url=image_url,
-            duration=duration,
-            points=points,
-            add_time=add_time,
-            author=author,
-            desc=desc))
+        query = data_store.SELECT_VIEWKEY_CMD.format(
+            tbl=self.db_table_name, viewkey=viewkey)
+        self.cursor.execute(query)
+        count = len(self.cursor.fetchall())
+        if count > 0:  # 如果有就更新
+            self.cursor.execute(data_store.UPDATE_CMD.format(
+                tbl=tal,
+                rf=rf,
+                viewkey=viewkey))
+        else:
+            self.cursor.execute(data_store.INSERT_CMD.format(
+                tbl=tal,
+                viewkey=viewkey,
+                name=name,
+                url=url,
+                download_url=download_url,
+                image_url=image_url,
+                duration=duration,
+                points=points,
+                add_time=add_time,
+                author=author,
+                rf=rf,
+                desc=desc))
         self.conn.commit()
         return item
 

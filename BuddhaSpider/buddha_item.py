@@ -18,4 +18,5 @@ class BuddhaItem(scrapy.Item):
     points = scrapy.Field()          # 积分
     add_time = scrapy.Field()        # 添加时间
     author = scrapy.Field()          # 作者
+    rf = scrapy.Field()              # 加精 1：是，0：否
     desc = scrapy.Field()            # 描述

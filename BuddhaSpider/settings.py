@@ -23,8 +23,8 @@ USER_AGENT_LIST = 'BuddhaSpider/utils/useragents.txt'
 
 # Modify according to your local proxy address
 # PROXY = 'http://127.0.0.1:1087'
-PROXY = 'http://127.0.0.1:56814'
-# PROXY = 'http://127.0.0.1:55134'
+# PROXY = 'http://127.0.0.1:56814'
+PROXY = 'http://127.0.0.1:55134'
 
 # Proxy list containing entries like
 # http://host1:port

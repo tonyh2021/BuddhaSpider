@@ -36,6 +36,7 @@ INSERT_CMD = """INSERT INTO {tbl} (
                     points,
                     add_time,
                     author,
+                    rf,
                     desc) VALUES (
                         '{viewkey}',
                         '{name}',
@@ -46,7 +47,11 @@ INSERT_CMD = """INSERT INTO {tbl} (
                         '{points}',
                         '{add_time}',
                         '{author}',
+                        '{rf}',
                         '{desc}');"""
+UPDATE_CMD = """UPDATE {tbl} SET \
+                    rf = '{rf}'
+                    WHERE viewkey = '{viewkey}';"""
 DROP_TABLE_CMD = """DROP TABLE IF EXISTS {tbl};"""
 CREATE_TALE_CMD = """CREATE TABLE IF NOT EXISTS {tbl} (
                     id integer primary key,
@@ -59,6 +64,7 @@ CREATE_TALE_CMD = """CREATE TABLE IF NOT EXISTS {tbl} (
                     points  text,
                     add_time  text,
                     author  text,
+                    rf int,
                     desc text);"""
 
 
