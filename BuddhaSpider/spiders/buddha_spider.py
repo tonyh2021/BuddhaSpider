@@ -26,9 +26,10 @@ class BuddhaSpider(scrapy.Spider):
     # BuddhaSpider
 
     name = "buddha"
-    start_urls = ['http://91porn.com/v.php?category=rf']
-    # http://91porn.com/v.php?next=watch 全部视频
-    # http://91porn.com/v.php?category=rf 最近加精
+    start_urls = [
+        'http://91porn.com/v.php?next=watch',  # 全部视频
+        'http://91porn.com/v.php?category=rf'  # 最近加精
+        ]
     # start_urls = ['https://www.zhihu.com/signin']
     # start_urls = ['https://twitter.com/']
     headers = {
@@ -45,10 +46,20 @@ class BuddhaSpider(scrapy.Spider):
         "watch_times": "1"
     }
 
+    def __init__(self, type):
+        self.type = type
+        super(BuddhaSpider, self).__init__()
+
     def start_requests(self):
+        logger.info("Buddha - Start, Type: %s" % self.type)
+        url = ''
+        if self.type == 0:
+            url = self.start_urls[0]
+        elif self.type == 1:
+            url = self.start_urls[1]
         return [
             scrapy.Request(
-                url=self.start_urls[0],
+                url=url,
                 callback=self.parse_last_page),
             ]
 
@@ -243,3 +254,7 @@ class BuddhaSpider(scrapy.Spider):
             end = start + 20
             viewkey = url[start:end]
         return viewkey
+
+    def closed(self, spider):
+        # second param is instance of spder about to be closed.
+        logger.info("Buddha - Closed")
