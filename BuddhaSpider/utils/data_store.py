@@ -24,7 +24,7 @@ handler.setFormatter(formatter)
 # 为日志器logger添加上面创建的处理器handler
 logger.addHandler(handler)
 
-SELECT_VIEWKEY_CMD = """SELECT viewkey FROM {tbl} WHERE viewkey
+SELECT_VIEWKEY_CMD = """SELECT viewkey,rf FROM {tbl} WHERE viewkey
                         = '{viewkey}';"""
 INSERT_CMD = """INSERT INTO {tbl} (
                     viewkey,
@@ -92,10 +92,10 @@ class DataStore(object):
         query = SELECT_VIEWKEY_CMD.format(
             tbl=self.db_table_name, viewkey=viewkey)
         self.cursor.execute(query)
-        viewkeys = self.cursor.fetchall()
-        if len(viewkeys) > 0:
-            return True
-        return False
+        items = self.cursor.fetchall()
+        if len(items) > 0:
+            return (True, items[0][1])
+        return (False, None)
 
     def fetch_all(self):
         query = "SELECT * FROM {tbl}".format(tbl=self.db_table_name)

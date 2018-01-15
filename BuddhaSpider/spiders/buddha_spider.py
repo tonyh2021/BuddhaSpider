@@ -3,7 +3,7 @@
 # Spider for 91 buddha
 #
 # See documentation in:
-# http://doc.scrapy.org/en/latest/topics/items.html
+# https://doc.scrapy.org/en/latest/topics/spiders.html
 
 
 import scrapy
@@ -52,7 +52,6 @@ class BuddhaSpider(scrapy.Spider):
 
     def start_requests(self):
         logger.info("Buddha - Start, Type: %s" % self.type)
-        url = ''
         if self.type == 0:
             url = self.start_urls[0]
         elif self.type == 1:
@@ -70,7 +69,7 @@ class BuddhaSpider(scrapy.Spider):
         last_page_num = math.ceil(int(total_count) / 20)
         logger.info("Videos Total Count: %s,\
             Pages Total Count: %s" % (total_count, last_page_num))
-        url = self.start_urls[0] + '&page=%s' % last_page_num
+        url = response.url + '&page=%s' % last_page_num
         yield scrapy.Request(
                 url=url,
                 callback=self.parse,
@@ -88,9 +87,13 @@ class BuddhaSpider(scrapy.Spider):
             # 查询是否重复
             viewkey = self._viewkey_from_url(href)
             ds = DataStore()
-            exists = ds.buddha_exists(viewkey)
+            (exists, rf) = ds.buddha_exists(viewkey)
             ds.close()
-            if exists and 'category=rf' not in self.start_urls[0]:
+            if self.type == 0 and exists:  # 全部抓取且存在，跳过
+                logger.warning("Ignore, View: %s exits" % (viewkey))
+                continue
+            elif self.type == 1 and exists and rf == 1:
+                # 精华且存在且已经为精华，跳过
                 logger.warning("Ignore, View: %s exits" % (viewkey))
                 continue
             random_ip = str(random.randint(0, 255)) + "." + \
@@ -216,7 +219,7 @@ class BuddhaSpider(scrapy.Spider):
         buddha["desc"] = desc
 
         buddha["rf"] = 0
-        if 'category=rf' in self.start_urls[0]:
+        if self.type == 1:
             logger.info("Buddha - Parse Detail rf : %s" % (buddha["rf"]))
             buddha["rf"] = 1
 
